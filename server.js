@@ -22,8 +22,3 @@ app.use('/api',commonRouters)
 app.listen(port,()=>{
   console.log(`port started on ${port}!!`)
 })
-
-
-// hello this for tes item and give me some time
-
-// hello this tes
