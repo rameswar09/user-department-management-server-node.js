@@ -26,12 +26,12 @@ const generateAuthToken = (userDoc) => {
     userDoc.tokens.push({ token })
     return userDoc
 }
-const sendEmailToUser = () => {
+const sendEmailToUser = (email) => {
     var mailOptions = {
         from: 'rameswarreddy.project@gmail.com',
         to: 'brameswarreddy@gmail.com',
         subject: 'Sending Email using Node.js by rameswar reddy',
-        text: 'That was easy!'
+        text: email + " has joined in your organisation"
     };
     transporter.sendMail(mailOptions, function (error, info) {
         if (error) {

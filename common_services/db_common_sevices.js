@@ -17,7 +17,7 @@ const getALL = (model, query) => {
 const getDataByID = (model, query) => {
     return new Promise(async (res, rej) => {
         try {
-            let getData = await model.findOne(query)
+            let getData = await model.findOne(query).lean()
             if (getData) {
                 return res(getData)
             } else {

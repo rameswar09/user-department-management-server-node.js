@@ -24,7 +24,6 @@ const formDeptVsUser = (allUsers, allDept) => {
     _.forEach(allDept, (dept) => {
         let users = _.get(groupByDept, dept.id, [])
         _.set(dept, 'users', users)
-        console.log("+==============================" + dept)
     })
     return allDept
 }

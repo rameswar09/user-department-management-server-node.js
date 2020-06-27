@@ -69,7 +69,7 @@ const userSignUp = async (req, res) => {
             let createUser = await commonDBServices.INSERT_ONE(userModel, [newUser])
 
             mgsObj.data = createUser[0]
-            appUtils.sendEmailToUser()
+            appUtils.sendEmailToUser(requestBody.email)
             if (createUser) {
                 res.json(mgsObj)
             } else {
@@ -83,7 +83,41 @@ const userSignUp = async (req, res) => {
     }
 }
 
+const resetPassWord = async (req, res) => {
+    try {
+        let mgsObj = {
+            error: "",
+            status: 200,
+            data: {}
+        }
+        let requestBody = req.body
+        var query = {
+            email: requestBody.email
+        }
+        let checkUser = await commonDBServices.GET_BY_ID(userModel, query)
+        if (_.isEmpty(checkUser)) {
+            mgsObj.error = "User is not exist"
+            res.json(mgsObj)
+        } else {
+            await appUtils.createHashPassword(requestBody)
+            let setObj = {
+                password: requestBody.password
+            }
+            let updateUser = await commonDBServices.UPDATE_BY_ID(userModel, query, setObj)
+            mgsObj.data = updateUser
+            if (updateUser) {
+                res.json(mgsObj)
+            } else {
+                res.json(mgsObj)
+            }
+        }
+    } catch (e) {
+        mgsObj.error = "Error occor please try again"
+        res.json({})
+    }
+}
 module.exports = {
     LOGIN_USER: userLogin,
-    SIGN_UP_USER: userSignUp
+    SIGN_UP_USER: userSignUp,
+    RESET_PASSWORD: resetPassWord
 }
