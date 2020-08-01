@@ -1,7 +1,8 @@
 const _ = require('lodash')
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs')
-var nodemailer = require('nodemailer');
+const nodemailer = require('nodemailer');
+const multer = require('multer');
 
 var transporter = nodemailer.createTransport({
     service: 'gmail',
@@ -41,9 +42,21 @@ const sendEmailToUser = (email) => {
         }
     });
 }
+const photoUplaod = multer({
+    limts: {
+        fileSize: 1000000
+    },
+    fileFilter(req, file, cb) {
+        if (!file.originalname.match(/\.(jpg|jpeg|png)$/)) {
+            return cb(new Error('Please upload an image'))
+        }
+        cb(undefined, true)
+    }
+})
 module.exports = {
     checkUserPassword,
     createHashPassword,
     generateAuthToken,
-    sendEmailToUser
+    sendEmailToUser,
+    photoUplaod
 }

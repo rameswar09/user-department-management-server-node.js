@@ -9,9 +9,10 @@ const formRequestQuery = () => {
         pending: { status: false, active: true },
         reject: { status: true, approved: false, active: true }
     }
-    return (reqId, deptId) => {
+    return (reqId, deptId, userCode) => {
         let query = { ...queryObj[reqId] }
         query.department = deptId
+        query.assigned_to = userCode
         return query
     }
 }
@@ -52,12 +53,13 @@ const getDeptWiseUsers = async (req, res) => {
     }
 }
 const fromAllNotificationsRequestsObj = (allNotificationsRequests, getAllUserByDeptId) => {
-    let groupByUser = _.groupBy(allNotificationsRequests, "created_by")
-    _.forEach(getAllUserByDeptId, (eachUser) => {
-        let getUserWiseNotifications = _.get(getAllUserByDeptId, eachUser.code, [])
-        _.set(eachUser, 'form_req', getUserWiseNotifications)
-    })
-    return getAllUserByDeptId
+    let groupByUserNotification = _.groupBy(allNotificationsRequests, "created_by")
+    let groupByUserDetails = _.groupBy(getAllUserByDeptId, 'code')
+    let data = {
+        groupByUserNotification,
+        groupByUserDetails
+    }
+    return data;
 }
 const getUserVSFormRequestData = async (req, res) => {
     try {
@@ -67,13 +69,13 @@ const getUserVSFormRequestData = async (req, res) => {
             data: {}
         }
         let reqBody = req.body
-        let query = queryForNotifications(reqBody.code, reqBody.dept_code)
+        let query = queryForNotifications(reqBody.code, reqBody.dept_code, reqBody.assigned_to)
         let allNotificationsRequests = await commonDBServices.FIND_ALL(models.fromRequest, query)
-        let getAllUserByDeptId = await commonDBServices.FIND_ALL(models.user, { department: reqBody.dept_code })
-        let data = fromAllNotificationsRequestsObj(allNotificationsRequests, getAllUserByDeptId)
-        if (data) {
-            mgsObj.data = data
-            res.json(data)
+        // let getAllUserByDeptId = await commonDBServices.FIND_ALL(models.user, { department: reqBody.dept_code })
+        // let data = fromAllNotificationsRequestsObj(allNotificationsRequests, getAllUserByDeptId)
+        if (allNotificationsRequests) {
+            mgsObj.data = allNotificationsRequests
+            res.json(mgsObj)
         } else {
             const getUserVSFormRequestData = async (req, res) => {
                 mgsObj.error = "Not found getUserVSFormRequestData"
@@ -87,10 +89,45 @@ const getUserVSFormRequestData = async (req, res) => {
     }
 }
 
+const formRequestUpdateQuery = () => {
+    let queryObj = {
+        approved: { approved: true, active: true, status: true },
+        reject: { status: true, approved: false, active: true }
+    }
+    return (reqId) => {
+        let query = { ...queryObj[reqId] }
+        return query
+    }
+}
+const getUpdateReqQuery = formRequestUpdateQuery()
+const updateRequest = async (req, res) => {
+    try {
+        let mgsObj = {
+            error: "",
+            status: 200,
+            data: {}
+        }
+        let reqBody = req.body;
+        let uniqeId = { id: reqBody.req_id }
+        let setObj = getUpdateReqQuery(reqBody.submit_id)
+        let allNotificationsRequests = await commonDBServices.UPDATE_BY_ID(models.fromRequest, uniqeId, setObj)
+        let notificationDetails = await commonDBServices.FIND_ALL(models.fromRequest, uniqeId)
 
+        if (notificationDetails) {
+            mgsObj.data = notificationDetails[0]
+        }
+        res.json(mgsObj)
+    } catch (e) {
+        console.log("Error while getUserVSFormRequestData" + e)
+        mgsObj.error = e
+        res.json(mgsObj)
+    }
+
+}
 
 
 module.exports = {
     GET_DEPT_WISE_USER: getDeptWiseUsers,
-    GET_ALL_UESRS_FORM_REQUEST_DATA: getUserVSFormRequestData
+    GET_ALL_UESRS_FORM_REQUEST_DATA: getUserVSFormRequestData,
+    UPDATE_REQ: updateRequest
 }

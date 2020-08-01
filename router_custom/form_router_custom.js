@@ -8,8 +8,11 @@ const formObj = (body) => {
     let obj = {
         id: shortid.generate(),
         assigned_to: body.assigned_user_code || "",
+        assigned_user_name: body.assigned_user_name || "",
         created_by: body.user_code || "",
-        department: body.department_id | "",
+        created_by_name: body.user_name || "",
+        department: body.department_id || "",
+        dept_name: body.dept_name || "",
         status: false, //processed or not
         active: true, // unique 
         approved: false, // only apporved is true,

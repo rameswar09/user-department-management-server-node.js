@@ -28,14 +28,10 @@ const createDept = async (req, res) => {
             res.json(mgsObj)
         } else {
             let newDept = formDept(deptReqBody)
-            let createNewDept = await commonDBServices.INSERT_ONE(deptModel, [newDept])
-            if (createNewDept) {
-                mgsObj.data = createNewDept
-                res.json(mgsObj)
-            } else {
-                mgsObj.error = "Error occor while inserting inrto the db"
-                res.json(mgsObj)
-            }
+            newDept = new deptModel(newDept)
+            await newDept.save()
+            mgsObj.data = newDept
+            res.json(mgsObj)
         }
     } catch (e) {
         console.log("Error occoured while createDept" + e)
@@ -44,26 +40,26 @@ const createDept = async (req, res) => {
     }
 }
 
-const getAllDept= async(req,res)=>{
-  try{
-    let mgsObj = {
-        error: "",
-        status: 200,
-        data: {}
+const getAllDept = async (req, res) => {
+    try {
+        let mgsObj = {
+            error: "",
+            status: 200,
+            data: {}
+        }
+        let getAllDept = await commonDBServices.FIND_ALL(deptModel, {})
+        if (getAllDept) {
+            mgsObj.data = getAllDept
+            res.json(mgsObj)
+        } else {
+            mgsObj.error = "could not fount all dept";
+            res.json(mgsObj)
+        }
+    } catch (e) {
+        console.log("error while detching all dept" + e)
+        mgsObj.error = "error while detching all dept"
+        res.json(mgsObj)
     }
-    let getAllDept= await commonDBServices.FIND_ALL(deptModel,{})
-    if(getAllDept){
-      mgsObj.data=getAllDept
-      res.json(mgsObj)
-    }else {
-      mgsObj.error="could not fount all dept";
-      res.json(mgsObj)
-    }
-  }catch(e){
-    console.log("error while detching all dept"+e)
-    mgsObj.error= "error while detching all dept"
-      res.json(mgsObj)
-  }
 }
 
 
@@ -75,5 +71,5 @@ const getAllDept= async(req,res)=>{
 
 module.exports = {
     CREATE_DEPT: createDept,
-    GET_ALL_DEPT:getAllDept
+    GET_ALL_DEPT: getAllDept
 }

@@ -25,6 +25,7 @@ const User = mongoose.model('User', {
     }],
     department: String,
     disabled: Boolean,
+    dept_name:String,
     time: { type: Date, default: Date.now }
 })
 

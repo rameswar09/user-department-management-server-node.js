@@ -3,8 +3,9 @@ const commonDBServices = require('../common_services/db_common_sevices')
 const _ = require('lodash')
 const shortid = require('shortid');
 const appUtils = require('../common_services/app.utils')
+const sharp = require('sharp')
 
-
+var string = ""
 const fromUserObj = async (body) => {
     let obj = {
         code: shortid.generate(),
@@ -12,6 +13,7 @@ const fromUserObj = async (body) => {
         email: body.email || "",
         password: body.password || "",
         department: body.department || "",
+        dept_name:body.dept_name,
         tokens: [],
         disabled: false
     }
@@ -65,16 +67,11 @@ const userSignUp = async (req, res) => {
             res.json(mgsObj)
         } else {
             let newUser = await fromUserObj(req.body)
-
-            let createUser = await commonDBServices.INSERT_ONE(userModel, [newUser])
-
-            mgsObj.data = createUser[0]
+            newUser = new userModel(newUser)
+            await newUser.save()
+            mgsObj.data = newUser
             appUtils.sendEmailToUser(requestBody.email)
-            if (createUser) {
-                res.json(mgsObj)
-            } else {
-                res.json(mgsObj)
-            }
+            res.json(mgsObj)
         }
     } catch (e) {
         console.log("error occord=============>" + e)
@@ -116,8 +113,15 @@ const resetPassWord = async (req, res) => {
         res.json({})
     }
 }
+const updatePhoto = async(req, res) => {
+    const buffer = await sharp(req.file.buffer).resize({ width: 250, height: 250 }).png().toBuffer()
+    res.set('Content-Type', 'image/png')
+    res.send(buffer)
+    console.log("hello this is the demo")
+}
 module.exports = {
     LOGIN_USER: userLogin,
     SIGN_UP_USER: userSignUp,
-    RESET_PASSWORD: resetPassWord
+    RESET_PASSWORD: resetPassWord,
+    UPDATE_PHOTO: updatePhoto
 }
