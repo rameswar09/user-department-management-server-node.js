@@ -22,12 +22,13 @@ const fromUserObj = async (body) => {
     return obj
 }
 const userLogin = async (req, res) => {
+    let mgsObj = {
+        error: "",
+        status: 200,
+        data: {}
+    }
     try {
-        let mgsObj = {
-            error: "",
-            status: 200,
-            data: {}
-        }
+        
         let requestBody = req.body
         var query = {
             email: requestBody.email
@@ -51,12 +52,12 @@ const userLogin = async (req, res) => {
     }
 }
 const userSignUp = async (req, res) => {
+    let mgsObj = {
+        error: "",
+        status: 200,
+        data: {}
+    }
     try {
-        let mgsObj = {
-            error: "",
-            status: 200,
-            data: {}
-        }
         let requestBody = req.body
         var query = {
             email: requestBody.email
@@ -70,7 +71,7 @@ const userSignUp = async (req, res) => {
             newUser = new userModel(newUser)
             await newUser.save()
             mgsObj.data = newUser
-            appUtils.sendEmailToUser(requestBody.email)
+            // appUtils.sendEmailToUser(requestBody.email)
             res.json(mgsObj)
         }
     } catch (e) {
